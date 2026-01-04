@@ -1,0 +1,110 @@
+[
+  {
+    "title": "Set Matrix Zeroes",
+    "topic": "Arrays",
+    "subTopics": ["Matrix", "Simulation"],
+    "difficulty": "Medium",
+    "youtubeLink": "https://youtu.be/N0MgLvceX7M",
+    "leetcodeLink": "https://leetcode.com/problems/set-matrix-zeroes/",
+    "tufBlogLink": "https://takeuforward.org/data-structure/set-matrix-zero/"
+  },
+  {
+    "title": "Pascal's Triangle",
+    "topic": "Arrays",
+    "subTopics": ["Combinatorics", "Matrix Construction"],
+    "difficulty": "Medium",
+    "youtubeLink": "https://youtu.be/bR7mQgwQ_o8",
+    "leetcodeLink": "https://leetcode.com/problems/pascals-triangle/",
+    "tufBlogLink": "https://takeuforward.org/data-structure/program-to-generate-pascals-triangle"
+  },
+  {
+    "title": "Next Permutation",
+    "topic": "Arrays",
+    "subTopics": ["Greedy", "Permutation Logic"],
+    "difficulty": "Medium",
+    "youtubeLink": "https://youtu.be/JDOXKqF60RQ",
+    "leetcodeLink": "https://leetcode.com/problems/next-permutation/",
+    "tufBlogLink": "https://takeuforward.org/data-structure/next_permutation-find-next-lexicographically-greater-permutation/"
+  },
+  {
+    "title": "Kadane’s Algorithm (Maximum Subarray Sum)",
+    "topic": "Arrays",
+    "subTopics": ["Dynamic Programming", "Greedy"],
+    "difficulty": "Medium",
+    "youtubeLink": "https://youtu.be/AHZpyENo7k4",
+    "leetcodeLink": "https://leetcode.com/problems/maximum-subarray/",
+    "tufBlogLink": "https://takeuforward.org/data-structure/kadanes-algorithm-maximum-subarray-sum-in-an-array/"
+  },
+  {
+    "title": "Sort an Array of 0’s, 1’s and 2’s",
+    "topic": "Arrays",
+    "subTopics": ["Two Pointers", "Dutch National Flag Algorithm"],
+    "difficulty": "Medium",
+    "youtubeLink": "https://www.youtube.com/watch?v=tp8JIuCXBaU",
+    "leetcodeLink": "https://leetcode.com/problems/sort-colors/",
+    "tufBlogLink": "https://takeuforward.org/data-structure/sort-an-array-of-0s-1s-and-2s/"
+  },
+  {
+    "title": "Best Time to Buy and Sell Stock",
+    "topic": "Arrays",
+    "subTopics": ["Greedy", "Prefix Min"],
+    "difficulty": "Medium",
+    "youtubeLink": "https://youtu.be/excAOvwF_Wk",
+    "leetcodeLink": "https://leetcode.com/problems/best-time-to-buy-and-sell-stock/",
+    "tufBlogLink": "https://takeuforward.org/data-structure/stock-buy-and-sell/"
+  },
+  {
+    "title": "Rotate Image",
+    "topic": "Arrays",
+    "subTopics": ["Matrix", "In-place", "Simulation"],
+    "difficulty": "Medium",
+    "youtubeLink": "https://youtu.be/Y72QeX0Efxw",
+    "leetcodeLink": "https://leetcode.com/problems/rotate-image/",
+    "tufBlogLink": "https://takeuforward.org/data-structure/rotate-image-by-90-degree/"
+  },
+  {
+    "title": "Merge Intervals",
+    "topic": "Arrays",
+    "subTopics": ["Intervals", "Sorting"],
+    "difficulty": "Medium",
+    "youtubeLink": "https://youtu.be/2JzRBPFYbKE",
+    "leetcodeLink": "https://leetcode.com/problems/merge-intervals/",
+    "tufBlogLink": "https://takeuforward.org/data-structure/merge-overlapping-sub-intervals/"
+  },
+  {
+    "title": "Find the Duplicate Number",
+    "topic": "Arrays",
+    "subTopics": ["Cycle Detection", "Floyd’s Algorithm"],
+    "difficulty": "Medium",
+    "youtubeLink": "https://youtu.be/32Ll35mhWg0",
+    "leetcodeLink": "https://leetcode.com/problems/find-the-duplicate-number/",
+    "tufBlogLink": "https://takeuforward.org/data-structure/find-the-duplicate-in-an-array-of-n1-integers/"
+  },
+  {
+    "title": "Repeat and Missing Number",
+    "topic": "Arrays",
+    "subTopics": ["Math", "XOR"],
+    "difficulty": "Medium",
+    "youtubeLink": "https://youtu.be/5nMGY4VUoRY",
+    "leetcodeLink": "https://www.interviewbit.com/problems/repeat-and-missing-number-array/",
+    "tufBlogLink": "https://takeuforward.org/data-structure/find-the-repeating-and-missing-numbers/"
+  },
+  {
+    "title": "Count Inversions",
+    "topic": "Arrays",
+    "subTopics": ["Merge Sort", "Divide and Conquer"],
+    "difficulty": "Hard",
+    "youtubeLink": "https://youtu.be/kQ1mJlwW-c0",
+    "leetcodeLink": "https://www.geeksforgeeks.org/counting-inversions/",
+    "tufBlogLink": "https://takeuforward.org/data-structure/count-inversions-in-an-array/"
+  },
+  {
+    "title": "Search in a 2D Matrix",
+    "topic": "Arrays",
+    "subTopics": ["Binary Search", "Matrix"],
+    "difficulty": "Medium",
+    "youtubeLink": "https://youtu.be/JXU4Akft7yk",
+    "leetcodeLink": "https://leetcode.com/problems/search-a-2d-matrix/",
+    "tufBlogLink": "https://takeuforward.org/data-structure/search-in-a-sorted-2d-matrix/"
+  }
+]
