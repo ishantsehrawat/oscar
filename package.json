@@ -10,7 +10,9 @@
     "lint": "next lint",
     "seed": "tsx scripts/seed-questions.ts",
     "migrate": "tsx scripts/migrate-questions.ts",
-    "yt-mapping": "tsx scripts/yt-mapping.js"
+    "yt-mapping": "tsx scripts/yt-mapping.js",
+    "deploy": "npm run build && firebase deploy --only hosting",
+    "deploy:hosting": "firebase deploy --only hosting"
   },
   "keywords": [],
   "author": "",
@@ -34,6 +36,7 @@
     "typescript": "^5.9.3"
   },
   "devDependencies": {
+    "firebase-tools": "^13.0.0",
     "puppeteer": "^24.34.0",
     "tsx": "^4.21.0"
   }
