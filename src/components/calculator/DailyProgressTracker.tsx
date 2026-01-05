@@ -5,17 +5,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { NumberInput } from "@/components/ui/NumberInput";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
-import {
-  saveDailyProgress,
-  getDailyProgress,
-  getAllDailyProgress,
-  deleteDailyProgress,
-} from "@/lib/storage/indexeddb";
+import { getDailyProgress, getAllDailyProgress, deleteDailyProgress } from "@/lib/storage/indexeddb";
+import { saveDailyProgress } from "@/features/dailyProgress/services/dailyProgressService";
+import { useAuth } from "@/contexts/AuthContext";
 import { DailyProgress } from "@/types/dailyProgress";
 import { format, parseISO, isToday, isYesterday } from "date-fns";
 import { Plus, Trash2, TrendingUp, Calendar } from "lucide-react";
 
 export function DailyProgressTracker() {
+  const { user } = useAuth();
   const [todayCount, setTodayCount] = useState(0);
   const [selectedDate, setSelectedDate] = useState(() => {
     const today = new Date();
@@ -71,7 +69,7 @@ export function DailyProgressTracker() {
     };
 
     try {
-      await saveDailyProgress(progress);
+      await saveDailyProgress(progress, user?.uid || null);
       await loadData();
     } catch (error) {
       console.error("Error saving daily progress:", error);

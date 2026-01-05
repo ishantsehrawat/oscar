@@ -4,16 +4,23 @@ import {
   batchSaveUserProgress,
   saveUserTest,
   saveUserSettings,
+  batchSaveUserDailyProgress,
+  saveUserDailyProgress,
+  saveUserCalculatorSettings,
 } from "@/lib/firebase/firestore";
 import { SyncQueueItem } from "@/types/user";
 import { QuestionProgress } from "@/types/progress";
 import { Test, UserTestSettings } from "@/types/test";
+import { DailyProgress } from "@/types/dailyProgress";
+import { CalculatorSettings } from "@/types/calculatorSettings";
 
 export async function syncQueueToFirestore(userId: string): Promise<void> {
   const queue = await getSyncQueue();
   const progressItems: QuestionProgress[] = [];
   const testItems: Test[] = [];
   let settingsItem: UserTestSettings | null = null;
+  const dailyProgressItems: DailyProgress[] = [];
+  let calculatorSettingsItem: CalculatorSettings | null = null;
 
   // Group items by type
   for (const item of queue) {
@@ -32,6 +39,16 @@ export async function syncQueueToFirestore(userId: string): Promise<void> {
         case "settings":
           if (item.action === "update") {
             settingsItem = item.data as UserTestSettings;
+          }
+          break;
+        case "dailyProgress":
+          if (item.action === "update" || item.action === "create") {
+            dailyProgressItems.push(item.data as DailyProgress);
+          }
+          break;
+        case "calculatorSettings":
+          if (item.action === "update") {
+            calculatorSettingsItem = item.data as CalculatorSettings;
           }
           break;
       }
@@ -78,6 +95,34 @@ export async function syncQueueToFirestore(userId: string): Promise<void> {
       }
     } catch (error) {
       console.error("Failed to sync settings:", error);
+    }
+  }
+
+  // Batch sync daily progress
+  if (dailyProgressItems.length > 0) {
+    try {
+      await batchSaveUserDailyProgress(userId, dailyProgressItems);
+      // Remove synced items from queue
+      for (const item of queue) {
+        if (item.type === "dailyProgress") {
+          await removeFromSyncQueue(item.id);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to sync daily progress:", error);
+    }
+  }
+
+  // Sync calculator settings
+  if (calculatorSettingsItem) {
+    try {
+      await saveUserCalculatorSettings(userId, calculatorSettingsItem);
+      const item = queue.find((q) => q.type === "calculatorSettings");
+      if (item) {
+        await removeFromSyncQueue(item.id);
+      }
+    } catch (error) {
+      console.error("Failed to sync calculator settings:", error);
     }
   }
 }

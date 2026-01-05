@@ -3,6 +3,7 @@
 import { Header } from "@/components/layout/Header";
 import { OscarProvider } from "@/components/oscar/OscarContext";
 import { SheetProvider } from "@/contexts/SheetContext";
+import { AuthProvider } from "@/contexts/AuthContext";
 import { OscarPresence } from "@/components/oscar/OscarPresence";
 import { useOscar } from "@/components/oscar/OscarContext";
 
@@ -17,6 +18,7 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   return (
+    <AuthProvider>
     <SheetProvider>
       <OscarProvider>
         <div className="min-h-screen bg-slate-50">
@@ -28,6 +30,7 @@ export default function MainLayout({
         <OscarMessages />
       </OscarProvider>
     </SheetProvider>
+    </AuthProvider>
   );
 }
 

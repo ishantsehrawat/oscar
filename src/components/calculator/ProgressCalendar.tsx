@@ -3,11 +3,10 @@
 import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import {
-  saveDailyProgress,
-  getAllDailyProgress,
-} from "@/lib/storage/indexeddb";
+import { getAllDailyProgress } from "@/lib/storage/indexeddb";
+import { saveDailyProgress } from "@/features/dailyProgress/services/dailyProgressService";
 import { DailyProgress } from "@/types/dailyProgress";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   format,
   startOfMonth,
@@ -26,6 +25,7 @@ import {
 } from "date-fns";
 import { ChevronLeft, ChevronRight, Plus, Minus } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
+import { QuestionSelectionDialog } from "./QuestionSelectionDialog";
 
 interface ProgressCalendarProps {
   startDate: Date;
@@ -67,6 +67,8 @@ export function ProgressCalendar({
   });
   const [progressEntries, setProgressEntries] = useState<DailyProgress[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   // Check if month navigation should be disabled
   const canNavigateToMonth = (month: Date): boolean => {
@@ -95,6 +97,8 @@ export function ProgressCalendar({
     }
   };
 
+  const { user } = useAuth();
+
   const handleUpdateProgress = async (date: string, delta: number) => {
     const existing = progressEntries.find((e) => e.date === date);
     const now = new Date();
@@ -108,7 +112,7 @@ export function ProgressCalendar({
     };
 
     try {
-      await saveDailyProgress(progress);
+      await saveDailyProgress(progress, user?.uid || null);
       // Update local state immediately without full reload to prevent re-render
       setProgressEntries((prev) => {
         const filtered = prev.filter((e) => e.date !== date);
@@ -156,6 +160,50 @@ export function ProgressCalendar({
   const getProgressForDate = (date: Date): number => {
     const dateStr = format(date, "yyyy-MM-dd");
     return progressEntries.find((e) => e.date === dateStr)?.count || 0;
+  };
+
+  const getProgressEntryForDate = (date: Date): DailyProgress | undefined => {
+    const dateStr = format(date, "yyyy-MM-dd");
+    return progressEntries.find((e) => e.date === dateStr);
+  };
+
+  const handleDayClick = (date: Date) => {
+    if (!isDateEditable(date)) return;
+    const dateStr = format(date, "yyyy-MM-dd");
+    const count = getProgressForDate(date);
+    // Only open dialog if there are questions to select
+    if (count > 0) {
+      setSelectedDate(dateStr);
+      setIsDialogOpen(true);
+    }
+  };
+
+  const handleSaveQuestions = async (questionIds: string[]) => {
+    if (!selectedDate) return;
+
+    const existing = getProgressEntryForDate(parseISO(selectedDate));
+    const now = new Date();
+
+    const progress: DailyProgress = {
+      date: selectedDate,
+      count: existing?.count || questionIds.length,
+      questionIds: questionIds,
+      createdAt: existing?.createdAt || now,
+      updatedAt: now,
+    };
+
+    try {
+      await saveDailyProgress(progress, user?.uid || null);
+      // Update local state
+      setProgressEntries((prev) => {
+        const filtered = prev.filter((e) => e.date !== selectedDate);
+        return [...filtered, progress];
+      });
+      onProgressChange?.();
+    } catch (error) {
+      console.error("Error saving questions:", error);
+      await loadProgress();
+    }
   };
 
   const getDailyGoal = (date: Date): number => {
@@ -264,8 +312,10 @@ export function ProgressCalendar({
                       // Only apply colors for editable dates
                       isEditable && goalStatus === "met" && "bg-yellow-50 border-yellow-300",
                       isEditable && goalStatus === "exceeded" && "bg-green-50 border-green-300",
-                      isEditable && goalStatus === "not-met" && "bg-red-50 border-red-300"
+                      isEditable && goalStatus === "not-met" && "bg-red-50 border-red-300",
+                      isEditable && "cursor-pointer hover:ring-2 hover:ring-blue-400 transition-all"
                     )}
+                    onClick={() => handleDayClick(day)}
                   >
                     {/* Date on top center */}
                     <div
@@ -293,8 +343,14 @@ export function ProgressCalendar({
                           <Minus className="w-2 h-2 sm:w-2.5 sm:h-2.5 md:w-3 md:h-3" />
                         </button>
                         
-                        {/* Question count in center */}
-                        <div className="flex-1 text-center min-w-0 px-0.5">
+                        {/* Question count in center - clickable to open dialog */}
+                        <div 
+                          className="flex-1 text-center min-w-0 px-0.5 cursor-pointer"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDayClick(day);
+                          }}
+                        >
                           <div className="text-[10px] sm:text-xs md:text-base font-bold text-slate-900 truncate">
                             {count}
                           </div>
@@ -342,6 +398,21 @@ export function ProgressCalendar({
           </div>
         )}
       </CardContent>
+
+      {/* Question Selection Dialog */}
+      {selectedDate && (
+        <QuestionSelectionDialog
+          open={isDialogOpen}
+          onClose={() => {
+            setIsDialogOpen(false);
+            setSelectedDate(null);
+          }}
+          date={selectedDate}
+          maxQuestions={getProgressForDate(parseISO(selectedDate)) || 0}
+          selectedQuestionIds={getProgressEntryForDate(parseISO(selectedDate))?.questionIds || []}
+          onSave={handleSaveQuestions}
+        />
+      )}
     </Card>
   );
 }

@@ -7,11 +7,11 @@ import { Input } from "@/components/ui/Input";
 import { calculateCompletionDate, compareProgress } from "@/lib/utils/calculator";
 import { ProgressCalendar } from "@/components/calculator/ProgressCalendar";
 import { EnhancedResultCard } from "@/components/calculator/EnhancedResultCard";
-import {
-  getAllDailyProgress,
+import { getAllDailyProgress } from "@/lib/storage/indexeddb";
+import { 
   saveCalculatorSettings,
   getCalculatorSettings,
-} from "@/lib/storage/indexeddb";
+} from "@/features/calculator/services/calculatorSettingsService";
 import { DailyProgress } from "@/types/dailyProgress";
 import { CalculatorSettings } from "@/types/calculatorSettings";
 import { Calculator, Edit2 } from "lucide-react";
@@ -19,9 +19,17 @@ import { Dialog } from "@/components/ui/Dialog";
 import { Button } from "@/components/ui/Button";
 import { useSheet } from "@/contexts/SheetContext";
 import { useProgress } from "@/features/progress/hooks/useProgress";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function CalculatorPage() {
-  const [totalQuestions, setTotalQuestions] = useState(191);
+  const { selectedSheet } = useSheet();
+  const { sheet } = useProgress(selectedSheet || undefined);
+  
+  // Use sheet total if sheet is selected, otherwise use custom total
+  const sheetTotal = sheet?.totalQuestions || 0;
+  const [customTotalQuestions, setCustomTotalQuestions] = useState(191);
+  const totalQuestions = selectedSheet && sheetTotal > 0 ? sheetTotal : customTotalQuestions;
+  
   const [questionsPerWeekday, setQuestionsPerWeekday] = useState(0);
   const [extraQuestionsToday, setExtraQuestionsToday] = useState(0);
   const [extraQuestionsWeekend, setExtraQuestionsWeekend] = useState(0);
@@ -78,6 +86,8 @@ export default function CalculatorPage() {
     settingsLoaded,
   ]);
 
+  const { user } = useAuth();
+
   const saveSettings = async () => {
     try {
       const settings: CalculatorSettings = {
@@ -89,7 +99,7 @@ export default function CalculatorPage() {
         startDate,
         updatedAt: new Date(),
       };
-      await saveCalculatorSettings(settings);
+      await saveCalculatorSettings(settings, user?.uid || null);
     } catch (error) {
       console.error("Error saving calculator settings:", error);
     }

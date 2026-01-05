@@ -7,18 +7,15 @@ import {
   getAllUserProgress,
 } from "../services/progressService";
 import { QuestionProgress, getProficiencyLevel } from "@/types/progress";
-import { onAuthChange } from "@/lib/firebase/auth";
-import { User as FirebaseUser } from "firebase/auth";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function useQuestionProgress(questionId: string) {
   const [progress, setProgress] = useState<QuestionProgress | null>(null);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<FirebaseUser | null>(null);
+  const { user } = useAuth();
 
   useEffect(() => {
-    const unsubscribe = onAuthChange(setUser);
     loadProgress();
-    return unsubscribe;
   }, [questionId]);
 
   async function loadProgress() {
@@ -46,7 +43,7 @@ export function useQuestionProgress(questionId: string) {
 
     await updateProgress(newProgress, user?.uid || null);
     setProgress(newProgress);
-  }, [questionId, progress, user]);
+  }, [questionId, progress, user?.uid]);
 
   const markForRevision = useCallback(async () => {
     const now = new Date();
@@ -62,7 +59,7 @@ export function useQuestionProgress(questionId: string) {
 
     await updateProgress(newProgress, user?.uid || null);
     setProgress(newProgress);
-  }, [questionId, progress, user]);
+  }, [questionId, progress, user?.uid]);
 
   const incrementAttempt = useCallback(async () => {
     const now = new Date();
@@ -78,7 +75,7 @@ export function useQuestionProgress(questionId: string) {
 
     await updateProgress(newProgress, user?.uid || null);
     setProgress(newProgress);
-  }, [questionId, progress, user]);
+  }, [questionId, progress, user?.uid]);
 
   const proficiency = progress ? getProficiencyLevel(progress.attempts) : null;
 

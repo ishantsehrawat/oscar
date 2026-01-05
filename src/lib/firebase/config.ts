@@ -35,7 +35,8 @@ export function initFirebase(): {
 
 export function getFirebaseAuth(): Auth {
   if (!auth) {
-    initFirebase();
+    const { auth: initializedAuth } = initFirebase();
+    auth = initializedAuth;
   }
   return auth!;
 }

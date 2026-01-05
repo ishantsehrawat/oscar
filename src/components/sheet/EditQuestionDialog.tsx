@@ -1,17 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog } from "@/components/ui/Dialog";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Button } from "@/components/ui/Button";
 import { TOPICS } from "@/constants/topics";
-import { Difficulty } from "@/types/question";
+import { Difficulty, Question } from "@/types/question";
 import { Plus, X } from "lucide-react";
 
-interface CreateQuestionDialogProps {
+interface EditQuestionDialogProps {
   open: boolean;
   onClose: () => void;
+  question: Question | null;
   onSubmit: (data: {
     title: string;
     topics: string[];
@@ -21,27 +22,41 @@ interface CreateQuestionDialogProps {
     order: number;
     sheets: string[];
   }) => Promise<void>;
-  nextOrder?: number;
-  defaultSheet?: string;
+  availableSheets: string[];
 }
 
-export function CreateQuestionDialog({
+export function EditQuestionDialog({
   open,
   onClose,
+  question,
   onSubmit,
-  nextOrder = 1,
-  defaultSheet = "Striver SDE Sheet",
-}: CreateQuestionDialogProps) {
+  availableSheets,
+}: EditQuestionDialogProps) {
   const [title, setTitle] = useState("");
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
-  const [selectedSheets, setSelectedSheets] = useState<string[]>([defaultSheet]);
+  const [selectedSheets, setSelectedSheets] = useState<string[]>([]);
   const [difficulty, setDifficulty] = useState<Difficulty>("Easy");
   const [leetcodeLink, setLeetcodeLink] = useState("");
   const [youtubeLink, setYoutubeLink] = useState("");
-  const [order, setOrder] = useState(nextOrder);
+  const [order, setOrder] = useState(1);
   const [customTopic, setCustomTopic] = useState("");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Populate form when question changes
+  useEffect(() => {
+    if (question) {
+      setTitle(question.title);
+      setSelectedTopics(question.topics || []);
+      setSelectedSheets(question.sheets || ["Striver SDE Sheet"]);
+      setDifficulty(question.difficulty);
+      setLeetcodeLink(question.leetcodeLink);
+      setYoutubeLink(question.youtubeLink || "");
+      setOrder(question.order);
+      setCustomTopic("");
+      setErrors({});
+    }
+  }, [question]);
 
   const handleTopicToggle = (topic: string) => {
     setSelectedTopics((prev) => {
@@ -127,27 +142,19 @@ export function CreateQuestionDialog({
         sheets: selectedSheets,
       });
 
-      // Reset form
-      setTitle("");
-      setSelectedTopics([]);
-      setSelectedSheets([defaultSheet]);
-      setDifficulty("Easy");
-      setLeetcodeLink("");
-      setYoutubeLink("");
-      setOrder(nextOrder);
-      setCustomTopic("");
-      setErrors({});
       onClose();
     } catch (error) {
-      console.error("Error creating question:", error);
-      setErrors({ submit: "Failed to create question. Please try again." });
+      console.error("Error updating question:", error);
+      setErrors({ submit: "Failed to update question. Please try again." });
     } finally {
       setLoading(false);
     }
   };
 
+  if (!question) return null;
+
   return (
-    <Dialog open={open} onClose={onClose} title="Add New Question" className="max-w-2xl">
+    <Dialog open={open} onClose={onClose} title="Edit Question" className="max-w-2xl">
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input
           label="Question Title *"
@@ -186,15 +193,20 @@ export function CreateQuestionDialog({
 
           {/* Sheet checkboxes */}
           <div className="max-h-32 overflow-y-auto border border-slate-200 rounded-lg p-3 space-y-2">
-            <label className="flex items-center gap-2 cursor-pointer hover:bg-slate-50 p-1 rounded">
-              <input
-                type="checkbox"
-                checked={selectedSheets.includes("Striver SDE Sheet")}
-                onChange={() => handleSheetToggle("Striver SDE Sheet")}
-                className="w-4 h-4 text-slate-900 border-slate-300 rounded focus:ring-slate-500 focus:ring-2"
-              />
-              <span className="text-sm text-slate-700">Striver SDE Sheet</span>
-            </label>
+            {Array.from(new Set(availableSheets)).map((sheetName, index) => (
+              <label
+                key={`sheet-${sheetName}-${index}`}
+                className="flex items-center gap-2 cursor-pointer hover:bg-slate-50 p-1 rounded"
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedSheets.includes(sheetName)}
+                  onChange={() => handleSheetToggle(sheetName)}
+                  className="w-4 h-4 text-slate-900 border-slate-300 rounded focus:ring-slate-500 focus:ring-2"
+                />
+                <span className="text-sm text-slate-700">{sheetName}</span>
+              </label>
+            ))}
           </div>
 
           {errors.sheets && (
@@ -310,7 +322,7 @@ export function CreateQuestionDialog({
           label="Order"
           type="number"
           value={order}
-          onChange={(e) => setOrder(parseInt(e.target.value) || nextOrder)}
+          onChange={(e) => setOrder(parseInt(e.target.value) || 1)}
           min={1}
         />
 
@@ -329,7 +341,7 @@ export function CreateQuestionDialog({
             Cancel
           </Button>
           <Button type="submit" variant="primary" className="flex-1" disabled={loading}>
-            {loading ? "Creating..." : "Create Question"}
+            {loading ? "Updating..." : "Update Question"}
           </Button>
         </div>
       </form>

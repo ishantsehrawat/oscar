@@ -1,8 +1,10 @@
 "use client";
 
 import { useProgress } from "@/features/progress/hooks/useProgress";
-import { ProgressOverview } from "@/components/progress/ProgressOverview";
-import { TopicProgress } from "@/components/progress/TopicProgress";
+import { CircularProgress } from "@/components/progress/CircularProgress";
+import { ScrollableTopicProgress } from "@/components/progress/ScrollableTopicProgress";
+import { StreakCalendar } from "@/components/progress/StreakCalendar";
+import { GoalStats } from "@/components/progress/GoalStats";
 import { Loader2 } from "lucide-react";
 import { useSheet } from "@/contexts/SheetContext";
 
@@ -37,9 +39,28 @@ export default function ProgressPage() {
         </div>
       )}
 
-      <ProgressOverview stats={stats} />
-      <TopicProgress stats={stats} />
+      {/* Bento Grid Layout */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-fr">
+        {/* Row 1: Circular Progress - spans 2 columns */}
+        <div className="md:col-span-2 lg:col-span-2">
+          <CircularProgress stats={stats} />
+        </div>
+
+        {/* Row 2: Streak Calendar - spans 2 columns */}
+        <div className="md:col-span-2 lg:col-span-2">
+          <StreakCalendar streak={stats.streak} />
+        </div>
+
+        {/* Row 1: Topic Progress - spans 2 columns */}
+        <div className="md:col-span-2 lg:col-span-2">
+          <ScrollableTopicProgress stats={stats} />
+        </div>
+
+        {/* Row 2: Goal Stats - spans 2 columns */}
+        <div className="md:col-span-2 lg:col-span-2">
+          <GoalStats />
+        </div>
+      </div>
     </div>
   );
 }
-

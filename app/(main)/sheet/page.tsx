@@ -6,30 +6,28 @@ import { useAllProgress } from "@/features/questions/hooks/useQuestionProgress";
 import { QuestionList } from "@/components/sheet/QuestionList";
 import { QuestionDetail } from "@/components/sheet/QuestionDetail";
 import { CreateQuestionDialog } from "@/components/sheet/CreateQuestionDialog";
+import { EditQuestionDialog } from "@/components/sheet/EditQuestionDialog";
 import { Loader2, Plus } from "lucide-react";
 import {
   updateProgress,
 } from "@/features/questions/services/progressService";
-import { onAuthChange } from "@/lib/firebase/auth";
-import { User as FirebaseUser } from "firebase/auth";
-import { useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import { QuestionProgress } from "@/types/progress";
-import { createQuestion } from "@/lib/firebase/firestore";
+import { createQuestion, updateQuestion, deleteQuestion } from "@/lib/firebase/firestore";
 import { Button } from "@/components/ui/Button";
+import { Dialog } from "@/components/ui/Dialog";
 import { useSheet } from "@/contexts/SheetContext";
+import { Question } from "@/types/question";
 
 export default function SheetPage() {
-  const { selectedSheet } = useSheet();
+  const { selectedSheet, availableSheets, refreshSheets } = useSheet();
   const { questions, loading: questionsLoading, refetch: refetchQuestions } = useQuestions(selectedSheet || undefined);
   const { progress, loading: progressLoading, refetch: refetchProgress } = useAllProgress();
   const [selectedQuestionId, setSelectedQuestionId] = useState<string | null>(null);
-  const [user, setUser] = useState<FirebaseUser | null>(null);
+  const { user } = useAuth();
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
-
-  useEffect(() => {
-    const unsubscribe = onAuthChange(setUser);
-    return unsubscribe;
-  }, []);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
   const progressMap = useMemo(() => {
     const map = new Map();
@@ -60,7 +58,7 @@ export default function SheetPage() {
     };
     await updateProgress(newProgress, user?.uid || null);
     refetchProgress();
-  }, [progressMap, user, refetchProgress]);
+  }, [progressMap, user?.uid, refetchProgress]);
 
   const handleMarkRevision = useCallback(async (questionId: string) => {
     const existing = progressMap.get(questionId);
@@ -76,7 +74,7 @@ export default function SheetPage() {
     };
     await updateProgress(newProgress, user?.uid || null);
     refetchProgress();
-  }, [progressMap, user, refetchProgress]);
+  }, [progressMap, user?.uid, refetchProgress]);
 
   const handleIncrementAttempt = useCallback(async (questionId: string) => {
     const existing = progressMap.get(questionId);
@@ -92,7 +90,7 @@ export default function SheetPage() {
     };
     await updateProgress(newProgress, user?.uid || null);
     refetchProgress();
-  }, [progressMap, user, refetchProgress]);
+  }, [progressMap, user?.uid, refetchProgress]);
 
   const handleCreateQuestion = useCallback(async (data: {
     title: string;
@@ -112,8 +110,37 @@ export default function SheetPage() {
       order: data.order,
       sheets: data.sheets,
     });
-    refetchQuestions();
-  }, [refetchQuestions]);
+    await refetchQuestions();
+    // Refresh sheets to update counts and available sheets list
+    await refreshSheets();
+  }, [refetchQuestions, refreshSheets]);
+
+  const handleUpdateQuestion = useCallback(async (data: {
+    title: string;
+    topics: string[];
+    difficulty: "Easy" | "Medium" | "Hard";
+    leetcodeLink: string;
+    youtubeLink: string | null;
+    order: number;
+    sheets: string[];
+  }) => {
+    if (!selectedQuestionId) return;
+    await updateQuestion(selectedQuestionId, data);
+    await refetchQuestions();
+    // Refresh sheets to update counts and available sheets list
+    await refreshSheets();
+    setEditDialogOpen(false);
+  }, [selectedQuestionId, refetchQuestions, refreshSheets]);
+
+  const handleDeleteQuestion = useCallback(async () => {
+    if (!selectedQuestionId) return;
+    await deleteQuestion(selectedQuestionId);
+    await refetchQuestions();
+    // Refresh sheets to update counts and available sheets list
+    await refreshSheets();
+    setDeleteConfirmOpen(false);
+    setSelectedQuestionId(null);
+  }, [selectedQuestionId, refetchQuestions, refreshSheets]);
 
   const nextOrder = useMemo(() => {
     if (questions.length === 0) return 1;
@@ -178,8 +205,46 @@ export default function SheetPage() {
           onMarkDone={() => handleMarkDone(selectedQuestionId)}
           onMarkRevision={() => handleMarkRevision(selectedQuestionId)}
           onIncrementAttempt={() => handleIncrementAttempt(selectedQuestionId)}
+          onEdit={() => setEditDialogOpen(true)}
+          onDelete={() => setDeleteConfirmOpen(true)}
         />
       )}
+
+      <EditQuestionDialog
+        open={editDialogOpen}
+        onClose={() => setEditDialogOpen(false)}
+        question={selectedQuestion}
+        onSubmit={handleUpdateQuestion}
+        availableSheets={availableSheets}
+      />
+
+      <Dialog
+        open={deleteConfirmOpen}
+        onClose={() => setDeleteConfirmOpen(false)}
+        title="Delete Question"
+      >
+        <div className="space-y-4">
+          <p className="text-slate-700">
+            Are you sure you want to delete "{selectedQuestion?.title}"? This action cannot be undone.
+          </p>
+          <div className="flex gap-3 pt-4">
+            <Button
+              variant="ghost"
+              onClick={() => setDeleteConfirmOpen(false)}
+              className="flex-1"
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              onClick={handleDeleteQuestion}
+              className="flex-1 bg-red-600 hover:bg-red-700"
+            >
+              Delete
+            </Button>
+          </div>
+        </div>
+      </Dialog>
     </div>
   );
 }
@@ -191,13 +256,17 @@ function QuestionDetailWrapper({
   onMarkDone,
   onMarkRevision,
   onIncrementAttempt,
+  onEdit,
+  onDelete,
 }: {
-  question: any;
-  progress?: any;
+  question: Question;
+  progress?: QuestionProgress;
   onClose: () => void;
   onMarkDone: () => void;
   onMarkRevision: () => void;
   onIncrementAttempt: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
 }) {
   return (
     <QuestionDetail
@@ -207,6 +276,8 @@ function QuestionDetailWrapper({
       onMarkDone={onMarkDone}
       onMarkRevision={onMarkRevision}
       onIncrementAttempt={onIncrementAttempt}
+      onEdit={onEdit}
+      onDelete={onDelete}
     />
   );
 }

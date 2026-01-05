@@ -10,7 +10,7 @@ export interface User {
 
 export interface SyncQueueItem {
   id: string;
-  type: "progress" | "test" | "settings";
+  type: "progress" | "test" | "settings" | "dailyProgress" | "calculatorSettings";
   action: "create" | "update" | "delete";
   data: any;
   timestamp: Date;

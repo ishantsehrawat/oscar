@@ -2,11 +2,10 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { syncQueueToFirestore, checkSyncStatus } from "../services/syncService";
-import { onAuthChange } from "@/lib/firebase/auth";
-import { User as FirebaseUser } from "firebase/auth";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function useSync() {
-  const [user, setUser] = useState<FirebaseUser | null>(null);
+  const { user } = useAuth();
   const [isOnline, setIsOnline] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [syncStatus, setSyncStatus] = useState<{
@@ -15,7 +14,6 @@ export function useSync() {
   }>({ hasPendingItems: false, itemCount: 0 });
 
   useEffect(() => {
-    const unsubscribe = onAuthChange(setUser);
     setIsOnline(navigator.onLine);
 
     const handleOnline = () => setIsOnline(true);
@@ -25,7 +23,6 @@ export function useSync() {
     window.addEventListener("offline", handleOffline);
 
     return () => {
-      unsubscribe();
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
     };
@@ -60,7 +57,7 @@ export function useSync() {
     } finally {
       setSyncing(false);
     }
-  }, [user, isOnline, syncing]);
+  }, [user?.uid, isOnline, syncing]);
 
   return {
     syncing,

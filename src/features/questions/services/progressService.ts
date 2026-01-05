@@ -14,7 +14,7 @@ import { addToSyncQueue } from "@/features/sync/services/syncQueue";
 
 export async function updateProgress(
   progress: QuestionProgress,
-  userId: string | null
+  userId: string | null = null
 ): Promise<void> {
   // Always save locally first
   await saveProgress(progress);

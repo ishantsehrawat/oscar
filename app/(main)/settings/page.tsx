@@ -4,12 +4,16 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { exportData, importData } from "@/lib/storage/indexeddb";
-import { Download, Upload } from "lucide-react";
+import { Download, Upload, RefreshCw } from "lucide-react";
 import { Input } from "@/components/ui/Input";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function SettingsPage() {
+  const { user, syncProgressOnLogin } = useAuth();
   const [exportDataText, setExportDataText] = useState("");
   const [importDataText, setImportDataText] = useState("");
+  const [syncing, setSyncing] = useState(false);
+  const [syncMessage, setSyncMessage] = useState<string | null>(null);
 
   const handleExport = async () => {
     try {
@@ -40,6 +44,28 @@ export default function SettingsPage() {
     } catch (error) {
       console.error("Failed to import data:", error);
       alert("Failed to import data. Please check the format.");
+    }
+  };
+
+  const handleSync = async () => {
+    if (!user) {
+      setSyncMessage("Please sign in to sync data");
+      setTimeout(() => setSyncMessage(null), 3000);
+      return;
+    }
+
+    try {
+      setSyncing(true);
+      setSyncMessage(null);
+      await syncProgressOnLogin();
+      setSyncMessage("Data synced successfully!");
+      setTimeout(() => setSyncMessage(null), 3000);
+    } catch (error) {
+      console.error("Sync failed:", error);
+      setSyncMessage("Failed to sync data. Please try again.");
+      setTimeout(() => setSyncMessage(null), 5000);
+    } finally {
+      setSyncing(false);
     }
   };
 
@@ -103,6 +129,41 @@ export default function SettingsPage() {
           </Button>
         </CardContent>
       </Card>
+
+      {user && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Cloud Sync</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-slate-600">
+              Sync your progress, daily goals, and calculator settings with the cloud.
+              This will fetch data from the cloud, merge with local data, and upload
+              any changes if needed.
+            </p>
+            <Button
+              variant="primary"
+              onClick={handleSync}
+              disabled={syncing}
+              className="flex items-center gap-2"
+            >
+              <RefreshCw className={`w-4 h-4 ${syncing ? "animate-spin" : ""}`} />
+              {syncing ? "Syncing..." : "Sync Now"}
+            </Button>
+            {syncMessage && (
+              <p
+                className={`text-sm ${
+                  syncMessage.includes("successfully")
+                    ? "text-green-600"
+                    : "text-red-600"
+                }`}
+              >
+                {syncMessage}
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

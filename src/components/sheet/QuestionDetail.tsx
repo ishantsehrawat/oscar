@@ -6,7 +6,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { formatDate } from "@/lib/utils/dateUtils";
-import { ExternalLink, X, BookOpen, Clock } from "lucide-react";
+import { ExternalLink, X, BookOpen, Clock, Edit2, Trash2 } from "lucide-react";
 
 interface QuestionDetailProps {
   question: Question;
@@ -15,6 +15,8 @@ interface QuestionDetailProps {
   onMarkDone: () => void;
   onMarkRevision: () => void;
   onIncrementAttempt: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
 }
 
 export function QuestionDetail({
@@ -24,6 +26,8 @@ export function QuestionDetail({
   onMarkDone,
   onMarkRevision,
   onIncrementAttempt,
+  onEdit,
+  onDelete,
 }: QuestionDetailProps) {
   const status = progress?.status || "not_started";
 
@@ -32,9 +36,21 @@ export function QuestionDetail({
       <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="flex-1">{question.title}</CardTitle>
-          <Button variant="ghost" size="sm" onClick={onClose}>
-            <X className="w-5 h-5" />
-          </Button>
+          <div className="flex items-center gap-2">
+            {onEdit && (
+              <Button variant="ghost" size="sm" onClick={onEdit} title="Edit question">
+                <Edit2 className="w-4 h-4" />
+              </Button>
+            )}
+            {onDelete && (
+              <Button variant="ghost" size="sm" onClick={onDelete} title="Delete question" className="text-red-600 hover:text-red-700 hover:bg-red-50">
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            )}
+            <Button variant="ghost" size="sm" onClick={onClose}>
+              <X className="w-5 h-5" />
+            </Button>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center gap-2">

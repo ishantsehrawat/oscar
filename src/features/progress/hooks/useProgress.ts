@@ -20,7 +20,7 @@ export function useProgress(sheetName?: string | null) {
   useEffect(() => {
     if (sheetName) {
       setSheetLoading(true);
-      
+
       // Try to get from cache first for faster loading
       getCachedSheet(sheetName)
         .then((cachedSheet) => {
@@ -32,7 +32,7 @@ export function useProgress(sheetName?: string | null) {
         .catch(() => {
           // Ignore cache errors, continue to Firestore
         });
-      
+
       // Then get from Firestore (will update cache)
       getSheet(sheetName)
         .then((sheetData) => {
@@ -82,12 +82,16 @@ export function useProgress(sheetName?: string | null) {
       // Filter questions and progress to only include questions from the selected sheet
       let filteredQuestions = questions;
       let filteredProgress = progress;
-      
+
       if (sheet && sheet.questionIds.length > 0) {
         // Filter questions by sheet questionIds
-        filteredQuestions = questions.filter((q) => sheet.questionIds.includes(q.id));
+        filteredQuestions = questions.filter((q) =>
+          sheet.questionIds.includes(q.id)
+        );
         // Filter progress to only include questions from the selected sheet
-        filteredProgress = progress.filter((p) => sheet.questionIds.includes(p.questionId));
+        filteredProgress = progress.filter((p) =>
+          sheet.questionIds.includes(p.questionId)
+        );
       }
 
       // Use sheet total if available, otherwise use filtered questions length
@@ -96,12 +100,23 @@ export function useProgress(sheetName?: string | null) {
       if (sheetName === "Striver SDE Sheet" && total === 0 && !sheet) {
         total = 191; // Default total for Striver SDE Sheet
       }
-      
+
       // Always calculate stats, even if total is 0 (will show 0/191)
-      const calculatedStats = calculateProgressStats(filteredQuestions, filteredProgress, total);
+      const calculatedStats = calculateProgressStats(
+        filteredQuestions,
+        filteredProgress,
+        total
+      );
       setStats(calculatedStats);
     }
-  }, [questions, progress, questionsLoading, progressLoading, sheetLoading, sheet]);
+  }, [
+    questions,
+    progress,
+    questionsLoading,
+    progressLoading,
+    sheetLoading,
+    sheet,
+  ]);
 
   return {
     stats,
@@ -111,4 +126,3 @@ export function useProgress(sheetName?: string | null) {
     sheet,
   };
 }
-
