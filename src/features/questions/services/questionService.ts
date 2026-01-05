@@ -38,7 +38,8 @@ export async function fetchQuestion(id: string): Promise<Question | null> {
     return question;
   } catch (error) {
     console.warn("Failed to fetch from Firestore, using cache:", error);
-    return getCachedQuestion(id) || null;
+    const cached = await getCachedQuestion(id);
+    return cached ?? null;
   }
 }
 

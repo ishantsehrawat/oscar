@@ -6,11 +6,12 @@ import { Select } from "@/components/ui/Select";
 import { Input } from "@/components/ui/Input";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { TOPICS } from "@/constants/topics";
+import { Question } from "@/types/question";
 
 interface TestConfigProps {
   config: TestConfig;
   onChange: (config: TestConfig) => void;
-  questions: { id: string; topic: string }[];
+  questions: Question[];
   completedQuestionIds: string[];
 }
 

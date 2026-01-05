@@ -1,7 +1,7 @@
 import React from "react";
 import { Input } from "./Input";
 
-interface NumberInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "type"> {
+interface NumberInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "type" | "onChange" | "value"> {
   label: string;
   error?: string;
   value: number;

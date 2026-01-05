@@ -6,17 +6,24 @@
    ```bash
    npm install -g firebase-tools
    ```
-
-2. **Login to Firebase**:
+   Or use npx (already in package.json):
    ```bash
-   firebase login
+   npx firebase-tools
    ```
+
+2. **Login to Firebase** (REQUIRED before deployment):
+   ```bash
+   npx firebase login
+   ```
+   This will open a browser window for authentication. Complete the login process.
 
 3. **Verify Firebase project**:
    ```bash
-   firebase projects:list
+   npx firebase projects:list
    ```
-   Make sure `oscar-51ecf` is in the list.
+   Make sure `oscar-51ecf` is in the list. If not, you may need to:
+   - Check you have access to the project
+   - Or update `.firebaserc` with the correct project ID
 
 ## Deployment Steps
 

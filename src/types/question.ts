@@ -1,3 +1,5 @@
+import { QuestionProgress } from "./progress";
+
 export type Difficulty = "Easy" | "Medium" | "Hard";
 
 export interface Question {

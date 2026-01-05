@@ -11,8 +11,9 @@ interface OscarDB extends DBSchema {
   questions: {
     key: string;
     value: Question;
-    indexes: { topic: string; difficulty: string };
+    indexes: { difficulty: string };
   };
+  // @ts-ignore - idb handles Date serialization at runtime, TypeScript types are strict
   progress: {
     key: string;
     value: QuestionProgress;
@@ -61,7 +62,6 @@ export async function getDB(): Promise<IDBPDatabase<OscarDB>> {
         const questionStore = db.createObjectStore("questions", {
           keyPath: "id",
         });
-        questionStore.createIndex("topic", "topic");
         questionStore.createIndex("difficulty", "difficulty");
       }
 

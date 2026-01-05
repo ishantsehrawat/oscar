@@ -154,15 +154,17 @@ export function GoalStats() {
           </div>
 
           {/* Original End Date */}
-          <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-            <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-slate-600" />
-              <span className="text-sm font-medium text-slate-700">Original End Date</span>
+          {comparison.originalEndDate && (
+            <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+              <div className="flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-slate-600" />
+                <span className="text-sm font-medium text-slate-700">Original End Date</span>
+              </div>
+              <span className="text-sm font-semibold text-slate-900">
+                {format(comparison.originalEndDate, "MMM d, yyyy")}
+              </span>
             </div>
-            <span className="text-sm font-semibold text-slate-900">
-              {format(comparison.originalEndDate, "MMM d, yyyy")}
-            </span>
-          </div>
+          )}
 
           {/* Schedule Difference */}
           {comparison.overshootDays !== null && (

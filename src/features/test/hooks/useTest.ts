@@ -31,7 +31,7 @@ export function useTest() {
   );
 
   const saveTest = useCallback(
-    async (testQuestions: Question[], config: TestConfig) => {
+    async (testQuestions: Question[], config: TestConfig): Promise<void> => {
       const test: Test = {
         id: `test-${Date.now()}`,
         createdAt: new Date(),
@@ -41,7 +41,6 @@ export function useTest() {
 
       await createTest(test, user?.uid || null);
       setCurrentTest(test);
-      return test;
     },
     [user]
   );
